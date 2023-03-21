@@ -2,6 +2,7 @@ import React from "react";
 import {Admin, Resource} from 'react-admin';
 import DataProvider from "./dataProvider/jsonApiDataProvider";
 import {PurchaseOrderList} from "./purchaseOrder/PurchaseOrderList";
+import {PurchaseOrderEdit} from "./purchaseOrder/PurchaseOrderEdit";
 import './App.css'
 
 const App = () => {
@@ -12,6 +13,7 @@ const App = () => {
             <Resource
                 name="purchaseorders"
                 list={PurchaseOrderList}
+                edit={PurchaseOrderEdit}
             />
         </Admin>
     );

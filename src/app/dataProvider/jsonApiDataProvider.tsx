@@ -2,7 +2,7 @@ import {stringify} from 'qs';
 import merge from 'deepmerge';
 import axios from 'axios';
 // @ts-ignore
-import {GET_LIST} from 'ra-jsonapi-client/src/actions';
+import {GET_LIST, GET_ONE} from 'ra-jsonapi-client/src/actions';
 // @ts-ignore
 import defaultSettings from 'ra-jsonapi-client/src/default-settings';
 // @ts-ignore
@@ -10,7 +10,6 @@ import {NotImplementedError} from 'ra-jsonapi-client/src/errors';
 // @ts-ignore
 import init from 'ra-jsonapi-client/src/initializer';
 
-export const DELETE_MANY = 'DELETE_MANY';
 init();
 
 const DataProvider = (apiUrl: string, userSettings: object = {}): (type: string, resource: string, params: any) => any => {
@@ -80,6 +79,10 @@ const DataProvider = (apiUrl: string, userSettings: object = {}): (type: string,
                 break;
             }
 
+            case GET_ONE:
+                url = `${apiUrl}/${resource}/${params.id}`;
+                break;
+
             default:
                 throw new NotImplementedError(`Unsupported Data Provider request type ${type}`);
         }
@@ -87,7 +90,7 @@ const DataProvider = (apiUrl: string, userSettings: object = {}): (type: string,
         return axios({url, ...options})
             .then((response) => {
                 let total;
-                if (type === GET_LIST) {
+                if (type === GET_LIST || type === GET_ONE) {
                     // @ts-ignore
                     if (response.data.meta && settings.total) {
                         // @ts-ignore
@@ -107,6 +110,16 @@ const DataProvider = (apiUrl: string, userSettings: object = {}): (type: string,
                                 value.attributes,
                             )),
                             total,
+                        };
+                    }
+
+                    case GET_ONE: {
+                        const {id, attributes} = response.data.data;
+
+                        return {
+                            data: {
+                                id, ...attributes,
+                            },
                         };
                     }
 

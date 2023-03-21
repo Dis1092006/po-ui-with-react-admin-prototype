@@ -1,4 +1,4 @@
-import {Datagrid, List, TextField} from "react-admin";
+import {Datagrid, EditButton, List, TextField} from "react-admin";
 
 export const PurchaseOrderList = (props: any) => {
     return (
@@ -7,6 +7,7 @@ export const PurchaseOrderList = (props: any) => {
                 <TextField source="id"/>
                 <TextField source="poDate"/>
                 <TextField source="terms"/>
+                <EditButton label={'View'}/>
             </Datagrid>
         </List>
     );
