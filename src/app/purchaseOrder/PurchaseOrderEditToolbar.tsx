@@ -7,9 +7,10 @@ interface PurchaseOrderEditToolbarProps extends ToolbarProps {
 }
 
 export const PurchaseOrderEditToolbar: FC<PurchaseOrderEditToolbarProps> = (props) => {
+    const {saveEnabled} = props;
     return (
-        <Toolbar {...props}>
-            {props.saveEnabled && <SaveButton/>}
+        <Toolbar>
+            {saveEnabled && <SaveButton/>}
         </Toolbar>
     );
 };

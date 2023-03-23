@@ -6,6 +6,7 @@ export const PurchaseOrderList = (props: any) => {
             <Datagrid>
                 <TextField source="id"/>
                 <TextField source="poDate"/>
+                <TextField source="supplierId"/>
                 <TextField source="terms"/>
                 <EditButton label={'View'}/>
             </Datagrid>

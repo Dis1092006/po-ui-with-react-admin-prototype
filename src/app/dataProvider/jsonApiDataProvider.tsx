@@ -2,7 +2,7 @@ import {stringify} from 'qs';
 import merge from 'deepmerge';
 import axios from 'axios';
 // @ts-ignore
-import {GET_LIST, GET_ONE} from 'ra-jsonapi-client/src/actions';
+import {GET_LIST, GET_ONE, GET_MANY_REFERENCE} from 'ra-jsonapi-client/src/actions';
 // @ts-ignore
 import defaultSettings from 'ra-jsonapi-client/src/default-settings';
 // @ts-ignore
@@ -83,6 +83,35 @@ const DataProvider = (apiUrl: string, userSettings: object = {}): (type: string,
                 url = `${apiUrl}/${resource}/${params.id}`;
                 break;
 
+            case GET_MANY_REFERENCE: {
+                const {page, perPage} = params.pagination;
+
+                // Create query with pagination params.
+                const query = {
+                    'page[size]': perPage,
+                    'page[number]': page,
+                };
+
+                // Add all filter params to query.
+                Object.keys(params.filter || {}).forEach((key) => {
+                    // @ts-ignore
+                    query[`filter[${key}]`] = params.filter[key];
+                });
+
+                // Add the reference id to the filter params.
+                // @ts-ignore
+                query['filter'] = `equals(${params.target},'${params.id}')`;
+
+                // Add sort parameter
+                if (params.sort && params.sort.field) {
+                    const prefix = params.sort.order === 'ASC' ? '' : '-';
+                    // @ts-ignore
+                    query['sort'] = `${prefix}${params.sort.field}`;
+                }
+
+                url = `${apiUrl}/${resource}?${stringify(query)}`;
+                break;
+            }
             default:
                 throw new NotImplementedError(`Unsupported Data Provider request type ${type}`);
         }
@@ -90,7 +119,7 @@ const DataProvider = (apiUrl: string, userSettings: object = {}): (type: string,
         return axios({url, ...options})
             .then((response) => {
                 let total;
-                if (type === GET_LIST || type === GET_ONE) {
+                if (type === GET_LIST || type === GET_MANY_REFERENCE) {
                     // @ts-ignore
                     if (response.data.meta && settings.total) {
                         // @ts-ignore
@@ -120,6 +149,17 @@ const DataProvider = (apiUrl: string, userSettings: object = {}): (type: string,
                             data: {
                                 id, ...attributes,
                             },
+                        };
+                    }
+
+                    case GET_MANY_REFERENCE: {
+                        return {
+                            // @ts-ignore
+                            data: response.data.data.map(value => Object.assign(
+                                {id: value.id},
+                                value.attributes,
+                            )),
+                            total,
                         };
                     }
 
